@@ -63,7 +63,7 @@ automatically employing cluster-scale epoch parallelism (see
 The system splits each round of replay into many time-slices, called
 epochs.  It instruments and executes each epoch on an independent core
 in a large compute cluster to materialize the data for the current
-sub-query.
+subquery.
 
 In the remainder of this README, we first describe how to download and
 install SteamDrill and then discuss how to use the system.  We end
