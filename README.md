@@ -88,7 +88,7 @@ distribution.
 
 TODO update to the new link
 
-$ git clone git@github.com:arquinn/steamdrill.git
+$ git clone git@github.com:arquinn/SteamDrill.git
 $ pushd steamdrill; git submodule update --recursive; popd
 $ git clone git@github.com:arquinn/Spark-For-OmniTable.git
 
