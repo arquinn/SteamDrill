@@ -1,0 +1,4 @@
+Address, False, Long
+Inst, False, String
+Reads, True, Array, String
+Writes, True, Array, String

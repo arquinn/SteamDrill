@@ -1,0 +1,8 @@
+File, False, String
+CacheFile, False, String
+Scope, False, String
+Name, False, String
+LowPC, False, Integer
+HighPC, False, Integer
+Function, False, String
+ReturnType, False, String

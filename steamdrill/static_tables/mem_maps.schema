@@ -1,0 +1,4 @@
+Location, False, Long
+CacheFile, False, String
+Executable, False, String
+SharedLib, False, Boolean

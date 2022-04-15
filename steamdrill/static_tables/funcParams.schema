@@ -1,0 +1,6 @@
+Name, False, String
+Source, True, String
+EntryPCs, False, Array, Long
+PName, False, String
+TFValue, False, String
+Type, False, String

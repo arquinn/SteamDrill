@@ -1,0 +1,14 @@
+REPLAY_CLOCK, False, Long
+LOGICAL_CLOCK, False, Long
+THREAD, False, Long
+PROCESS, False, Long
+EIP, False, Long
+EAX, False, Long
+EBX, False, Long
+ECX, False, Long
+EDX, False, Long
+EDI, False, Long
+ESI, False, Long
+EBP, False, Long
+ESP, False, Long
+Mem, False, Array, Byte

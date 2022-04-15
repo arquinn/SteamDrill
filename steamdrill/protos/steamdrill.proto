@@ -1,0 +1,199 @@
+syntax = "proto2";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.steamdrill";
+option java_outer_classname = "SteamdrillProto";
+option objc_class_prefix = "HLW";
+
+package Steamdrill;
+
+//service Steamdrill {
+// rpc GetParts(PartsQuery) returns (stream Partition) {}
+  //rpc BuildSHCode(SDQuery) returns (SHCommand) {}
+//  rpc RunEpoch(SDQuery) returns (stream SHResult) {}
+//}
+
+message SDExpression {
+  oneof exp {
+    Metadata meta = 1;
+    NotExpression ne = 2;
+    BinaryComparisonExpression bce = 3;
+    BinaryOperatorExpression boe = 4;
+    TracingFunction tf = 5;
+    MemoryDereference md = 6;
+    TracingCodeCall tc = 7;
+    Register reg = 8;
+    Literal lit = 9;
+    SDCast cat = 10;
+    SDField field = 11;
+  }
+}
+
+message Metadata {
+  enum MetadataType {
+    REPLAY_CLOCK = 0;
+    LOGICAL_CLOCK = 1;
+    SDEPTH = 2;
+    PROCESS  = 3;
+    THREAD   = 4;
+    STACK    = 5; // this *should* just be a tracign function, but how?
+  }
+  required MetadataType val = 1;
+}
+
+message Register {
+  enum DoubleWord {
+    EAX = 0;
+    EBX = 1;
+    ECX = 2;
+    EDX = 3;
+    EDI = 4;
+    ESI = 5;
+    ESP = 6;
+    EBP = 7;
+    EIP = 8;
+  }
+  required DoubleWord val = 1;
+}
+
+message Literal {
+  enum LiteralType {
+    STRING = 0;
+    INTEGER = 1;
+    SHORT = 2;
+    BOOLEAN = 3;
+  }
+  required LiteralType type = 1;
+  oneof val {
+    bool   bval = 2;
+    int32  ival = 3;
+    string sval = 4;
+  }
+}
+
+message SDCast {
+  required SDExpression expr = 1;
+  required string type = 2;
+}
+
+message SDField {
+  required SDExpression expr = 1;
+  required string field = 2;
+}
+
+
+
+message BinaryComparisonExpression {
+  enum Operator {
+    EQUALS = 0;
+    GREATER = 1;
+    GEQ = 2;
+    LESS = 3;
+    LEQ = 4;
+    NOT_EQUALS = 5;
+  }
+  required Operator op = 1;;
+  required SDExpression e1 = 2;
+  required SDExpression e2 = 3;
+}
+message NotExpression {
+  required SDExpression e = 1;
+}
+
+message MemoryDereference {
+  required SDExpression operand = 1;
+}
+
+message BinaryOperatorExpression {
+  enum Operator {
+    ADD = 0;
+    SUB = 1;
+    MULTIPLY = 2;
+    OR = 3;
+    AND = 4;
+  }
+  required Operator op = 1;
+  required SDExpression e1 = 2;
+  required SDExpression e2 = 3;
+}
+
+message TracingFunction {
+  required string name = 1;
+  required string location = 2;
+  repeated SDExpression operands = 3;
+}
+
+message TracingCodeCall {
+  required string functionName = 1;
+  repeated SDExpression operands = 2;
+}
+
+message TracingCodeDef {
+  required string code = 1;
+  required string name = 2;
+  required string returnType = 3;  // going to try this with a string?
+  repeated string inputs = 4;
+}
+
+message DataType {
+  oneof type {
+    BuiltinType builtin = 1;
+    MapType map = 2;
+  }
+}
+
+enum BuiltinType {
+  STRING = 0;
+  INTEGER = 1;
+  LONG = 2;
+  BOOL = 3;
+}
+
+message MapType {
+  required DataType key = 1;
+  required DataType value = 2;
+}
+
+message SDRelation {
+  repeated SDExpression cols = 1;
+  repeated SDExpression filters = 2;
+  optional int32 output = 3;
+}
+
+message SDQuery {
+  required string replay = 1;
+  required int64 exitClock = 2;
+  repeated TracingCodeDef tracingCodeDefs = 3;
+  repeated SDRelation rels = 4;
+}
+
+// Data needed to run a SH query
+//message SHQuery {
+//  string    replay = 1;
+//  SHCommand command = 2;
+//  Partition epoch = 3;
+//  string    stats_file = 4;
+//}
+
+//message SHCommand {
+  //  string instrs = 1;
+//  string tracers = 2;
+//  string libc_config = 3;
+//  string standard_tracers = 4;
+//}
+
+//message PartsQuery {
+//  string replay = 1;
+//  int32  num_cores = 2;
+//  string log = 3;
+//}
+
+//message Partition {
+//  int32 start_clock = 1;
+//  int32 start_pid = 2;
+//  int32 stop_clock = 3;
+//}
+
+//message SHResult {
+//  string result = 1;
+//}

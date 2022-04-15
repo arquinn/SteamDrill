@@ -1,0 +1,6 @@
+
+
+struct Extraction{
+    char whocares;
+};
+

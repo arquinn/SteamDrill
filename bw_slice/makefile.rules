@@ -1,0 +1,166 @@
+##############################################################
+#
+# This file includes all the test targets as well as all the
+# non-default build rules and test recipes.
+#
+##############################################################
+
+SDEV=../test
+TAINTS_LIB=taints
+GRAPH_INTERFACE=graph_interface
+REPLAY_LIB += $(SDEV)/libutil.a
+TOOL_LIBS += $(SDEV)/libutil.a
+
+GLIB_INCLUDES=-I/usr/include/glib-2.0 -I/usr/lib/i386-linux-gnu/glib-2.0/include
+GLIB_LIB= -lglib-2.0
+TOOL_CXXFLAGS += $(GLIB_INCLUDES) -I$(SDEV)  -std=c++11 -gdwarf-2 -O8 -DUSE_SHMEM
+
+DIFT_FLAGS=-DDIFT -DUSE_SHMEM
+NO_FLAGS=-DNO_TRACK  -DUSE_SHMEM
+
+
+HEADERS= bw_slice.h list.h xray_monitor.h taint_nw.h  $(GRAPH_INTERFACE)/graph_interface.h $(GRAPH_INTERFACE)/node.h 
+SLICE_HEADERS= $(HEADERS) $(GRAPH_INTERFACE)/slice_linkage_function.h
+DIFT_HEADERS= $(HEADERS) $(GRAPH_INTERFACE)/taint_linkage_function.h
+NO_HEADERS= $(HEADERS) $(GRAPH_INTERFACE)/null_linkage_function.h
+
+OBJS=$(OBJDIR)maputil.o
+SLICE_BACK_OBJS=$(OBJS) $(OBJDIR)graph_interface.o $(OBJDIR)input_output.o  $(OBJDIR)filters.o
+DIFT_BACK_OBJS=$(OBJS) $(OBJDIR)dgraph_interface.o $(OBJDIR)dinput_output.o $(OBJDIR)dfilters.o
+
+APP_CC=gcc
+
+
+
+##############################################################
+#
+# Test targets
+#
+##############################################################
+
+###### Place all generic definitions here ######
+
+# This defines tests which run tools of the same name.  This is simply for convenience to avoid
+# defining the test name twice (once in TOOL_ROOTS and again in TEST_ROOTS).
+# Tests defined here should not be defined in TOOL_ROOTS and TEST_ROOTS.
+TEST_TOOL_ROOTS := bw_slice
+# dift call_stack no_track
+
+# This defines all the applications that will be run during the tests.
+APP_ROOTS :=   
+#parallel.a postprocess_dift postprocess_slice read_graph cmp_slice
+
+
+##############################################################
+#
+# Build rules
+#
+##############################################################
+
+##########
+# Shared
+#
+$(OBJDIR)maputil$(OBJ_SUFFIX): maputil.h maputil.c
+	$(CXX) $(TOOL_CXXFLAGS) -Wall -Werror -c -o $(OBJDIR)maputil$(OBJ_SUFFIX) $(GLIB_INCLUDES) maputil.c
+
+##################
+# CALLSTACK TOOL
+#
+
+$(OBJDIR)call_stack.o: call_stack.cpp
+	$(CXX) $(TOOL_CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)call_stack$(PINTOOL_SUFFIX): $(OBJDIR)call_stack.o $(OBJDIR)syscall_names.o $(OBJDIR)CallStack.o
+	$(LINKER) $(TOOL_LDFLAGS) $(LINK_EXE)$@ $^ $(TOOL_LPATHS) $(TOOL_LIBS) -lglib-2.0 -lrt
+
+
+##############
+# SLICE TOOL
+#
+$(OBJDIR)node.o: $(GRAPH_INTERFACE)/node.cpp $(GRAPH_INTERFACE)/node.h
+	$(CXX) $(TOOL_CXXFLAGS) -Wall -Werror -c -o $@ $< 
+
+
+$(OBJDIR)input_output.o: $(GRAPH_INTERFACE)/input_output.cpp $(HEADERS)
+	$(CXX) $(TOOL_CXXFLAGS) -Wall -Werror -c -o $@ $< $(GLIB_INCLUDES)
+
+$(OBJDIR)filters.o: $(GRAPH_INTERFACE)/filters.cpp $(GRAPH_INTERFACE)/graph_interface.h
+	$(CXX) $(TOOL_CXXFLAGS) -Wall -Werror -c -o $@ $< $(GLIB_INCLUDES)
+
+$(OBJDIR)graph_interface.o: $(GRAPH_INTERFACE)/graph_interface.cpp $(GRAPH_INTERFACE)/graph_interface.h taint_nw.h
+	$(CXX) $(TOOL_CXXFLAGS) -Wall -Werror -c -o $@ $< $(GLIB_INCLUDES)
+
+$(OBJDIR)bw_slice.o: bw_slice.cpp $(SLICE_HEADERS) 
+	$(CXX) $(TOOL_CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)bw_slice$(PINTOOL_SUFFIX): $(OBJDIR)bw_slice.o $(SLICE_BACK_OBJS)
+	$(LINKER) $(TOOL_LDFLAGS) $(LINK_EXE)$@ $^ $(TOOL_LPATHS) $(TOOL_LIBS) -lglib-2.0 -lrt
+
+############
+# DIFT TOOL 
+#
+$(OBJDIR)dnode.o: $(GRAPH_INTERFACE)/node.cpp $(GRAPH_INTERFACE)/node.h
+	$(CXX) $(DIFT_FLAGS) $(TOOL_CXXFLAGS) -Wall -Werror -c -o $@ $< 
+
+
+$(OBJDIR)dinput_output.o: $(GRAPH_INTERFACE)/input_output.cpp $(HEADERS)
+	$(CXX) $(DIFT_FLAGS) $(TOOL_CXXFLAGS) -Wall -Werror -c -o $@ $< $(GLIB_INCLUDES)
+
+$(OBJDIR)dfilters.o: $(GRAPH_INTERFACE)/filters.cpp $(GRAPH_INTERFACE)/graph_interface.h
+	$(CXX) $(DIFT_FLAGS) $(TOOL_CXXFLAGS) -Wall -Werror -c -o $@ $< $(GLIB_INCLUDES)
+
+
+$(OBJDIR)dgraph_interface.o: $(GRAPH_INTERFACE)/graph_interface.cpp $(GRAPH_INTERFACE)/graph_interface.h taint_nw.h
+	$(CXX) $(DIFT_FLAGS) $(TOOL_CXXFLAGS) -Wall -Werror -c -o $@ $< $(GLIB_INCLUDES)
+
+$(OBJDIR)dift.o: bw_slice.cpp $(DIFT_HEADERS) 
+	$(CXX) $(DIFT_FLAGS) $(TOOL_CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)dift$(PINTOOL_SUFFIX): $(OBJDIR)dift.o $(DIFT_BACK_OBJS)
+	$(LINKER) $(TOOL_LDFLAGS) $(LINK_EXE) $@ $^ $(TOOL_LPATHS) $(TOOL_LIBS) -lglib-2.0 -lrt
+
+############
+# NULL TOOL 
+#
+$(OBJDIR)no_track.o: bw_slice.cpp $(NO_HEADERS) 
+	$(CXX) $(NO_FLAGS) $(TOOL_CXXFLAGS) -c -o $@ $<
+
+$(OBJDIR)no_track$(PINTOOL_SUFFIX): $(OBJDIR)no_track.o $(SLICE_BACK_OBJS)
+	$(LINKER) $(TOOL_LDFLAGS) $(LINK_EXE)$@ $^ $(TOOL_LPATHS) $(TOOL_LIBS) -lglib-2.0 -lrt
+
+
+#####################
+# postprocess tools
+#
+
+$(OBJDIR)slice$(OBJ_SUFFIX): postprocess/slice.h postprocess/slice.cpp
+	$(CXX) $(TOOL_CXXFLAGS) -Wall -Werror -c -o $(OBJDIR)slice$(OBJ_SUFFIX) postprocess/slice.cpp
+
+$(OBJDIR)flowback$(OBJ_SUFFIX): postprocess/flowback.h postprocess/flowback.cpp
+	$(CXX) $(TOOL_CXXFLAGS) -Wall -Werror -c -o $(OBJDIR)flowback$(OBJ_SUFFIX) postprocess/flowback.cpp
+
+$(OBJDIR)input_set$(OBJ_SUFFIX): postprocess/input_set.cpp postprocess/input_set.h
+	$(CXX) $(TOOL_CXXFLAGS) -Wall -Werror -c -o $@ $<
+
+
+$(OBJDIR)postprocess_dift:  postprocess/postprocess_dift.cpp  maputil.c maputil.h $(OBJDIR)input_set.o $(OBJDIR)dnode.o
+	$(CXX) -std=c++0x $(TOOL_CXXFLAGS) -DDIFT -Wall -Werror -o $@ $(GLIB_INCLUDES) $(OBJDIR)input_set.o postprocess/postprocess_dift.cpp maputil.c $(OBJDIR)dnode.o -lglib-2.0 -lrt -lprofiler
+
+
+$(OBJDIR)cmp_slice: postprocess/cmp_slice.cpp $(OBJDIR)slice$(OBJ_SUFFIX) 
+	$(CXX) -std=c++0x $(TOOL_CXXFLAGS) -Wall -Werror -o $(OBJDIR)cmp_slice postprocess/cmp_slice.cpp $(OBJDIR)slice.o 
+
+$(OBJDIR)analyze_slice: postprocess/analyze_slice.cpp $(OBJDIR)slice$(OBJ_SUFFIX) $(OBJDIR)input_set$(OBJ_SUFFIX)
+	$(CXX) -std=c++0x $(TOOL_CXXFLAGS) -Wall -Werror -o $@ $< $(OBJDIR)slice.o $(OBJDIR)input_set.o
+
+$(OBJDIR)cmp_inputs: postprocess/cmp_inputs.cpp maputil.h maputil.c
+	$(CXX) -std=c++0x $(TOOL_CXXFLAGS) -Wall -Werror -o $@ $< maputil.c
+
+
+$(OBJDIR)showall: showall.c maputil.c maputil.h
+	$(APP_CC) -Wall -Werror -g -o $(OBJDIR)showall $(GLIB_INCLUDES) showall.c maputil.c -lglib-2.0
+
+
+$(OBJDIR)parallel.a: $(OBJDIR)input_set.o $(OBJDIR)maputil.o $(OBJDIR)slice.o 
+	ar rv $@ $^
+	ranlib $@

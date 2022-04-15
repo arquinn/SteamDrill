@@ -1,0 +1,64 @@
+##############################################################
+#
+# This file includes all the test targets as well as all the
+# non-default build rules and test recipes.
+#
+##############################################################
+
+SDEV=../../test
+TAINTS_LIB=taints
+REPLAY_LIB += $(SDEV)/libutil.a
+TOOL_LIBS += $(SDEV)/libutil.a
+TOOL_CXXFLAGS += -I$(SDEV) -std=c++0x
+GLIB_INCLUDES=-I/usr/include/glib-2.0 -I/usr/lib/i386-linux-gnu/glib-2.0/include
+GLIB_LIB= -lglib-2.0
+TOOL_CXXFLAGS += $(GLIB_INCLUDES) -I$(SDEV) -O8
+MY_OBJS=$(OBJDIR)xray_token$(OBJ_SUFFIX)
+
+##############################################################
+#
+# Test targets
+#
+##############################################################
+
+###### Place all generic definitions here ######
+
+# This defines tests which run tools of the same name.  This is simply for convenience to avoid
+# defining the test name twice (once in TOOL_ROOTS and again in TEST_ROOTS).
+# Tests defined here should not be defined in TOOL_ROOTS and TEST_ROOTS.
+TEST_TOOL_ROOTS := min_tool
+
+# This defines all the applications that will be run during the tests.
+APP_ROOTS := run_tool 
+
+##############################################################
+#
+# Test recipes
+#
+##############################################################
+
+# This section contains recipes for tests other than the default.
+# See makefile.default.rules for the default test rules.
+# All tests in this section should adhere to the naming convention: <testname>.test
+
+
+##############################################################
+#
+# Build rules
+#
+##############################################################
+
+# This section contains the build rules for all binaries that have special build rules.
+# See makefile.default.rules for the default build rules.
+
+#for some reason it doesn't like OBJDIR here... *sigh*
+obj-ia32/run_tool: run_tool.c
+	$(CXX) -Wall -Werror $(GLIB_INCLUDES) -I$(SDEV) -o $@ $< $(GLIB_LIB) $(REPLAY_LIB)
+
+
+# Pintools
+$(OBJDIR)min_tool$(OBJ_SUFFIX): min_tool.cpp
+	$(CXX) $(TOOL_CXXFLAGS) $(COMP_OBJ)$@ $<
+
+$(OBJDIR)min_tool$(PINTOOL_SUFFIX): $(OBJDIR)min_tool$(OBJ_SUFFIX)
+	$(LINKER) $(TOOL_LDFLAGS) $(LINK_EXE)$@ $^ $(TOOL_LPATHS) $(TOOL_LIBS) -lglib-2.0

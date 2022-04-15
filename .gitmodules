@@ -1,0 +1,23 @@
+[submodule "steamdrill/lib/args"]
+	path = steamdrill/lib/args
+	url = https://github.com/Taywee/args
+[submodule "steamdrill/lib/json"]
+	path = steamdrill/lib/json
+	url = https://github.com/nlohmann/json
+[submodule "steamdrill/lib/capstone"]
+	path = steamdrill/lib/capstone
+	url = https://github.com/aquynh/capstone
+[submodule "steamdrill/lib/spdlog"]
+	path = steamdrill/lib/spdlog
+	url = git@github.com:gabime/spdlog.git
+[submodule "steamdrill/lib/libunwind"]
+	path = steamdrill/lib/libunwind
+	url = https://github.com/libunwind/libunwind.git
+	ignore = untracked
+[submodule "steamdrill/lib/elfutils"]
+	path = steamdrill/lib/elfutils
+	url = git@github.com:arquinn/elfutils.git
+	ignore = untracked
+[submodule "steamdrill/lib/OmniTable-Musl"]
+	path = steamdrill/lib/OmniTable-Musl
+	url = git@github.com:arquinn/OmniTable-Musl.git

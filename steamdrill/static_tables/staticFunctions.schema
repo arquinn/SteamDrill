@@ -1,0 +1,6 @@
+Name, False, String
+Source, True, String
+EntryPCs, False, Array, Long
+ReturnPCs, False, Array, Long
+LowPC, False, Long
+HighPC, False, Long

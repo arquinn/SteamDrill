@@ -1,0 +1,5 @@
+File, False, String
+CacheFile, False, String
+Name, False, String
+Ptr, False, Integer
+ReturnType, False, String
