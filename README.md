@@ -1,12 +1,12 @@
 # Time-Transcendent Debugging the OmniTable Way
 
-###### i.e., our prototype implementation of the OmniTable Query Model and the Steamdrill time-trascendent debugger
+###### i.e., our prototype implementation of the OmniTable Query Model and the Steamdrill time-transcendent debugger
 
 #### Overview
 
 This repository contains the prototype implementation of the OmniTable
-Query model and the SteamDrill trascendent debugger.  The OmniTable
-query model enables time-trascendent debugging---developers can express
+Query model and the SteamDrill time-transcendent debugger.  The OmniTable
+query model enables time-transcendent debugging---developers can express
 debugging code that is decoupled from the time sequence of the
 original execution to better summarize, compare, and understand buggy
 behavior in an execution.  We find that such power is especially
@@ -22,12 +22,12 @@ exposes a SQL query interface to enable succinct reasoning over huge
 portions of a program's execution.  Critically, the combination of SQL
 above an offline execution abstraction enables debugging logic that is
 not inherently tied to the time sequence of the original program
-execution; instead, developer scan write queries that simultaenously
+execution; instead, developer scan write queries that simultaneously
 observe, summarize, and compare events at many points in an execution.
 
 However, the OmniTable abstraction itself is infeasible to
 realize---its size is on the order of the number of instructions
-executed times the size of the memory space of the exectuion.
+executed times the size of the memory space of the execution.
 Storing, or even calculating, such a massive abstraction constitutes
 substantial overheads that are unreasonable for all but the shortest
 executions.
@@ -45,14 +45,14 @@ data required for recomputing the OmniTable.
 SteamDrill uses the time-transcendence of the OmniTable model as a
 vector to drastically improve the speed of debugging queries.  The
 system resolves debugging queries using many replay executions rather
-than a single execution in two ways.  First, it employes a novel
+than a single execution in two ways.  First, it employs a novel
 multi-replay resolution strategy that decomposes a query into many
 independent subqueries.  The strategy resolves each subquery in a new
-replay execution, reexecuting the same underlying execution logic many
+replay execution, re-executing the same underlying execution logic many
 times, in the order of their expected materialization costs.  The
 approach allows SteamDrill to use the data obtained from
 inexpensive-to-materialize subqueries to reduce the materialization
-cost of expensive-to-materialize subqueries--often, we find that the
+cost of expensive-to-materialize subqueries---often, we find that the
 benefits of such information dwarfs the cost of a new replay
 execution.
 
@@ -63,7 +63,7 @@ automatically employing cluster-scale epoch parallelism (see
 The system splits each round of replay into many time-slices, called
 epochs.  It instruments and executes each epoch on an independent core
 in a large compute cluster to materialize the data for the current
-subquery.
+sub-query.
 
 In the remainder of this README, we first describe how to download and
 install SteamDrill and then discuss how to use the system.  We end
@@ -80,7 +80,7 @@ started.
 
 1) Download and install the 12.04.2 LTS Ubuntu Linux 32-bit
 distribution.  You should install this distro before
-proceeeding--Arnold will not work if you try to run it on another
+proceeding---Arnold will not work if you try to run it on another
 distribution.
 
 2) Obtain the SteamDrill source code and all submodules:
@@ -94,7 +94,7 @@ $ git clone git@github.com:arquinn/Spark-For-OmniTable.git
 3) Install all of the dependencies for Arnold, SteamDrill, and Spark.
 
 ```
-$ sudo apt-get install libboost-all-dev gawk texinfo autoconf gettext openjdk-8-jdf wget cmake llvm-dev
+$ sudo apt-get install libboost-all-dev gawk texinfo autoconf gettext openjdk-8-jdk wget cmake llvm-dev
 $ sudo mkdir -p /opt/gradle; sudo chmod 751 /opt/gradle;
 $ pushd /opt/gradle;
 $ wget https://services.gradle.org/distributions/gradle-7.4.2-bin.zip
@@ -266,14 +266,14 @@ to a cluster of machines, and we assume that the `/replay_logdb` folder
 is stored in filesystem shared across the nodes (we used
 [glusterfs](https://www.gluster.org/) in our experiments).
 
-1) You must first prepare your cluster for your replay.  Note--these
+1) You must first prepare your cluster for your replay.  Note---these
 steps only need to occur once per replay, repeated queries over the
-same execution need not reprep the cluster.  The `prep_replay.sh` in
+same execution need not re-prepare the cluster.  The `prep_replay.sh` in
 the `<steamdrill>/server` folder performs these steps for our particular
 experimental cluster; below we outline them more generally:
 
 1.a) First, you use our static disassembly tool on the executables
-used by the execution. You must perfom this step on each host in the cluster:
+used by the execution. You must perform this step on each host in the cluster:
 
 ```
 $ pushd <steamdrill>/server; ./block_cache_add.sh <replay>; popd
@@ -290,7 +290,7 @@ $ ./resume -pthread <omniplay>/src/omniplay/eglibc-2.15/prefix/lib --ckpt_at=$ck
 $ done
 ```
 
-2) Write your query.  The simplist approach is to create a query using
+2) Write your query.  The simplest approach is to create a query using
 Spark's dataframe API as a new file, named <query.scala>, in the
 `<steamdrill>/spark_datasource/src/main/scala/examples` directory.
 
